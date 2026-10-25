@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-links a {
+            padding: 8px 20px;
+            text-decoration: none;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .login-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .captcha-section {
+            margin-bottom: 20px;
+        }
+
+        .captcha-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .captcha-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .captcha-input {
+            flex: 1;
+        }
+
+        .captcha-input input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 18px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .captcha-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .captcha-image-wrapper {
+            flex-shrink: 0;
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.3s;
+        }
+
+        .captcha-image-wrapper:hover {
+            border-color: #667eea;
+        }
+
+        .captcha-image-wrapper img {
+            display: block;
+            height: 50px;
+            width: auto;
+        }
+
+        .captcha-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            display: block;
+        }
+
+        .message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            display: block;
+        }
+
+        .success-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .success-overlay.show {
+            display: flex;
+        }
+
+        .success-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            color: #4caf50;
+        }
+
+        .success-modal h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .success-modal p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .btn-close {
+            padding: 12px 30px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-close:hover {
+            background: #388e3c;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>系统登录</h1>
+                <p>Level 4 验证码安全验证</p>
+            </div>
+
+            <nav class="nav-links">
+                <a href="/generator">验证码生成器</a>
+                <a href="/login" class="active">登录页面</a>
+            </nav>
+
+            <div class="login-body">
+                <div class="message" id="message"></div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" name="username" placeholder="请输入用户名" autocomplete="username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" name="password" placeholder="请输入密码" autocomplete="current-password" required>
+                    </div>
+
+                    <div class="captcha-section">
+                        <label>验证码</label>
+                        <div class="captcha-wrapper">
+                            <div class="captcha-input">
+                                <input type="text" id="captchaCode" placeholder="请输入验证码" maxlength="4" autocomplete="off" required>
+                            </div>
+                            <div class="captcha-image-wrapper" onclick="refreshCaptcha()" title="点击刷新验证码">
+                                <img id="captchaImage" src="" alt="验证码">
+                            </div>
+                        </div>
+                        <div class="captcha-hint">点击图片可刷新验证码 (Level 4 - 综合复杂)</div>
+                    </div>
+
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        登 录
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功弹窗 -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-modal">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M20 6L9 17l-5-5"/>
+                </svg>
+            </div>
+            <h2>登录成功</h2>
+            <p>欢迎回来，管理员！</p>
+            <button class="btn-close" onclick="closeSuccess()">确 定</button>
+        </div>
+    </div>
+
+    <script>
+        let currentCaptchaId = '';
+
+        // 页面加载时获取验证码
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshCaptcha();
+            // 自动聚焦到用户名输入框
+            document.getElementById('username').focus();
+        });
+
+        async function refreshCaptcha() {
+            try {
+                const response = await fetch('/api/get-login-captcha');
+                const result = await response.json();
+
+                if (result.success) {
+                    currentCaptchaId = result.data.id;
+                    document.getElementById('captchaImage').src = result.data.image;
+                    document.getElementById('captchaCode').value = '';
+                    hideMessage();
+                } else {
+                    showMessage('获取验证码失败: ' + (result.error || '未知错误'), true);
+                }
+            } catch (error) {
+                showMessage('网络错误，无法获取验证码', true);
+            }
+        }
+
+        function showMessage(text, isError = true) {
+            const msgEl = document.getElementById('message');
+            msgEl.textContent = text;
+            msgEl.className = 'message ' + (isError ? 'error' : 'success');
+        }
+
+        function hideMessage() {
+            document.getElementById('message').className = 'message';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const captchaCode = document.getElementById('captchaCode').value.trim();
+
+            // 基本验证
+            if (!username) {
+                showMessage('请输入用户名');
+                document.getElementById('username').focus();
+                return;
+            }
+            if (!password) {
+                showMessage('请输入密码');
+                document.getElementById('password').focus();
+                return;
+            }
+            if (!captchaCode) {
+                showMessage('请输入验证码');
+                document.getElementById('captchaCode').focus();
+                return;
+            }
+
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span>登录中...';
+            hideMessage();
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        captcha_id: currentCaptchaId,
+                        captcha_code: captchaCode
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && response.status === 200) {
+                    // 登录成功
+                    showSuccessModal();
+                } else {
+                    showMessage(result.message || '登录失败');
+                    // 刷新验证码
+                    refreshCaptcha();
+                }
+            } catch (error) {
+                showMessage('网络错误: ' + error.message);
+                refreshCaptcha();
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '登 录';
+            }
+        }
+
+        function showSuccessModal() {
+            document.getElementById('successOverlay').classList.add('show');
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('show');
+            // 清空表单
+            document.getElementById('loginForm').reset();
+            // 刷新验证码
+            refreshCaptcha();
+            hideMessage();
+        }
+
+        // 输入框回车提交
+        document.getElementById('captchaCode').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
